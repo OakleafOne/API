@@ -3,132 +3,153 @@ import {useEffect} from "react"
 import axios from "axios"
 import "./game.css"
 
-const TicTacToeGame = () => {
+const Game = () => {
   
-  const [board, setBoard] = useState(Array(9).fill(''));
-  const [isXNext, setIsXNext] = useState(true); // True = Du (X), False = API/Datorn (O)
+  const [name, setName] = useState('');
+  const [userGuess, setUserGuess] = useState('');
+  const [apiData, setApiData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [winner, setWinner] = useState(null);
+  const [error, setError] = useState(null);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [gameResult, setGameResult] = useState('');
 
-  const apiKey = '{API-HERE}';
-  const apiHost = 'tic-tac-toe6.p.rapidapi.com';
-
-  const checkWinner = (squares) => {
-    const lines = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
+  const handlePlay = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    if (!userGuess) {
+      setGameResult('Please select a guess before consulting the Oracle!');
+      return;
     }
-    if (squares.every(square => square !== '')) return 'Tie';
-    return null;
-  };
 
-  useEffect(() => {
-    if (!isXNext && !winner) {
-      fetchComputerMove();
-    }
-  }, [isXNext, winner]);
-
-  const convertBoardToString = (currentBoard) => {
-    return currentBoard.map(cell => cell === '' ? ' ' : cell).join('');
-  };
-
-  const fetchComputerMove = async () => {
     setLoading(true);
-    const boardString = convertBoardToString(board);
+    setError(null);
+    setApiData(null);
+    setGameResult('');
 
-    const options = {
-      method: 'POST',
-      url: `https://${apiHost}/gimme_a_move`,
-      headers: {
-        'content-type': 'application/json',
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': apiHost
-      },
-      data: {
-        board: boardString
-      }
-    };
     try {
-      const response = await axios.request(options);
-      const computerMoveIndex = response.data.move; 
-
-      if (computerMoveIndex !== undefined && board[computerMoveIndex] === '') {
-        const newBoard = [...board];
-        newBoard[computerMoveIndex] = 'O';
-        setBoard(newBoard);
-        
-        const gameResult = checkWinner(newBoard);
-        if (gameResult) {
-          setWinner(gameResult);
-        } else {
-          setIsXNext(true);
-        }
+      const response = await fetch(`https://api.agify.io?name=${name.toLowerCase().trim()}`);
+      if (!response.ok) throw new Error('The Oracle failed to respond. Try again later.');
+      
+      const data = await response.json();
+      
+      if (data.age === null) {
+        throw new Error("The Oracle has never heard that name! Try a more common one.");
       }
-    } catch (error) {
-      console.error("Could not get move from API:", error);
+
+      setApiData(data);
+      evaluateResult(data.age);
+    } catch (err) {
+      setError(err.message);
+      setStreak(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClick = (index) => {
-    if (board[index] !== '' || !isXNext || winner || loading) return;
+  const evaluateResult = (predictedAge) => {
+    const isYoung = predictedAge < 40;
+    const actualCategory = isYoung ? 'young' : 'old';
 
-    const newBoard = [...board];
-    newBoard[index] = 'X';
-    setBoard(newBoard);
-
-    const gameResult = checkWinner(newBoard);
-    if (gameResult) {
-      setWinner(gameResult);
+    if (userGuess === actualCategory) {
+      setScore((prev) => prev + 1);
+      setStreak((prev) => prev + 1);
+      setGameResult(`Correct! The Oracle predicts ${name} is ${predictedAge} years old.`);
     } else {
-      setIsXNext(false);
+      setStreak(0);
+      setGameResult(`Incorrect! The Oracle predicts ${name} is ${predictedAge} years old.`);
     }
   };
 
-  const resetGame = () => {
-    setBoard(Array(9).fill(''));
-    setIsXNext(true);
-    setWinner(null);
+  const handleReset = () => {
+    setName('');
+    setUserGuess('');
+    setApiData(null);
+    setGameResult('');
+    setError(null);
   };
 
   return (
-    <div className="game-container">
-      <h2>Tic-Tac-Toe</h2>
-      
-      <div className="status-message">
-        {winner ? (
-          winner === 'Tie' ? 'It is a tie!' : `Winner: ${winner}`
-        ) : (
-          isXNext ? 'It is: Player move (X)' : 'It is: AI move (O)...'
-        )}
+    <div className="oracle-container">
+      <header className="oracle-header">
+        <h2>The Name Oracle Mini-Game</h2>
+        <p>Can you outsmart the data? Guess if the API clocks a name as young or old.</p>
+      </header>
+
+      <div className="scoreboard">
+        <div className="score-box">
+          <span>Score</span>
+          <strong>{score}</strong>
+        </div>
+        <div className="score-box">
+          <span>Streak</span>
+          <strong>{streak}</strong>
+        </div>
       </div>
 
-      {loading && <div className="spinner">Thinking...</div>}
+      <form onSubmit={handlePlay} className="oracle-form">
+        <div className="input-group">
+          <label htmlFor="name-input">Enter a Name:</label>
+          <input
+            id="name-input"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Type a name..."
+            disabled={loading}
+            maxLength={20}
+          />
+        </div>
 
-      <div className="grid">
-        {board.map((value, index) => (
-          <button 
-            key={index} 
-            className={`cell ${value}`} 
-            onClick={() => handleClick(index)}
-            disabled={value !== '' || !isXNext || winner}
-          >
-            {value}
-          </button>
-        ))}
-      </div>
+        <div className="guess-group">
+          <p>Your Guess:</p>
+          <div className="radio-options">
+            <label className={`radio-label ${userGuess === 'young' ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                name="age-guess"
+                value="young"
+                checked={userGuess === 'young'}
+                onChange={(e) => setUserGuess(e.target.value)}
+                disabled={loading}
+              />
+               Young (&lt; 40)
+            </label>
+            <label className={`radio-label ${userGuess === 'old' ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                name="age-guess"
+                value="old"
+                checked={userGuess === 'old'}
+                onChange={(e) => setUserGuess(e.target.value)}
+                disabled={loading}
+              />
+              Old (40+)
+            </label>
+          </div>
+        </div>
 
-      <button className="reset-btn" onClick={resetGame}>Play Again!</button>
+        <button type="submit" className="submit-btn" disabled={loading || !name}>
+          {loading ? 'Consulting...' : 'Lock Choice & Summon Data'}
+        </button>
+      </form>
+
+      {error && <div className="status-message error">{error}</div>}
+
+      {gameResult && <div className={`status-message result ${gameResult.includes('') ? 'win' : 'lose'}`}>{gameResult}</div>}
+
+      {apiData && (
+        <div className="data-display-card">
+          <h3>Retrieved API Payload Data:</h3>
+          <ul>
+            <li><strong>Analyzed Name:</strong> {apiData.name}</li>
+            <li><strong>Estimated Median Age:</strong> {apiData.age} years</li>
+            <li><strong>Sample Count Size:</strong> {apiData.count.toLocaleString()} profiles</li>
+          </ul>
+          <button onClick={handleReset} className="reset-btn">Play Again</button>
+        </div>
+      )}
     </div>
   );
 };
-
-export default TicTacToeGame;
+export default Game;

@@ -1,12 +1,12 @@
 import React from "react"
-import TicTacToeGame from "./components/Game"
+import Game from "./components/Game.jsx"
 
 function App() {
     return (
         <div className="App">
             <h1>Mitt API-Projekt</h1>
 
-            <TicTacToeGame />
+            <Game />
         </div>
     )
 }

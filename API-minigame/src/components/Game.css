@@ -1,80 +1,189 @@
-.game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+:root {
+  --primary-glow: #646cff;
+  --bg-card: #1a1a1a;
+  --bg-input: #242424;
+  --text-main: #f5f5f5;
+  --accent-green: #4caf50;
+  --accent-red: #f44336;
+  --border-radius: 12px;
+}
+
+.oracle-container {
+  max-width: 550px;
   margin: 2rem auto;
-  max-width: 400px;
-  background: #f9f9f9;
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-.status-message {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: #333;
-  height: 1.5rem;
-}
-
-.spinner {
-  color: #007bff;
-  font-style: italic;
-  margin-bottom: 0.5rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 100px);
-  grid-template-rows: repeat(3, 100px);
-  gap: 8px;
+.oracle-header {
+  text-align: center;
   margin-bottom: 1.5rem;
 }
 
-.cell {
-  background: #fff;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 2.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+.oracle-header h2 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-glow);
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-around;
+  background: var(--bg-input);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  border: 1px solid #333;
+}
+
+.score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score-box span {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.score-box strong {
+  font-size: 1.5rem;
+  color: var(--primary-glow);
+}
+
+.oracle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group input {
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 2px solid #444;
+  background: var(--bg-input);
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--primary-glow);
+}
+
+.radio-options {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.radio-label {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-input);
+  border: 2px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
 }
 
-.cell:hover:not(:disabled) {
-  background: #f0f0f0;
-  border-color: #bbb;
+.radio-label input {
+  display: none;
 }
 
-.cell.X {
-  color: #ff4a4a;
+.radio-label.selected {
+  border-color: var(--primary-glow);
+  background: rgba(100, 108, 255, 0.1);
 }
 
-.cell.O {
-  color: #007bff;
+.submit-btn, .reset-btn {
+  padding: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--primary-glow);
+  color: white;
+  transition: opacity 0.2s;
 }
 
-.cell:disabled {
+.submit-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .reset-btn {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: bold;
-  color: white;
-  background-color: #28a745;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
+  background: #333;
+  margin-top: 1rem;
+  width: 100%;
 }
 
 .reset-btn:hover {
-  background-color: #218838;
+  background: #444;
+}
+
+.status-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.status-message.error {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--accent-red);
+  color: #ff8a80;
+}
+
+.status-message.win {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid var(--accent-green);
+}
+
+.status-message.lose {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--accent-red);
+}
+
+.data-display-card {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #111;
+  border-left: 4px solid var(--primary-glow);
+  border-radius: 4px;
+}
+
+.data-display-card h3 {
+  margin-top: 0;
+  font-size: 1rem;
+  color: #aaa;
+}
+
+.data-display-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.data-display-card li {
+  margin-bottom: 0.4rem;
 }
