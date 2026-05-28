@@ -1,6 +1,7 @@
 import {useState} from "react"
 import {useEffect} from "react"
 import axios from "axios"
+import "./game.css"
 
 const TicTacToeGame = () => {
   
@@ -9,7 +10,7 @@ const TicTacToeGame = () => {
   const [loading, setLoading] = useState(false);
   const [winner, setWinner] = useState(null);
 
-  const apiKey = 'DIN_RAPIDAPI_NYCKEL_HÄR'; 
+  const apiKey = '{API-HERE}';
   const apiHost = 'tic-tac-toe6.p.rapidapi.com';
 
   const checkWinner = (squares) => {
@@ -104,9 +105,9 @@ const TicTacToeGame = () => {
       
       <div className="status-message">
         {winner ? (
-          winner === "Tie" ? "It's a tie!" : "Vinnare: ${winner}"
+          winner === 'Tie' ? 'It is a tie!' : `Winner: ${winner}`
         ) : (
-          "It is: ${isXNext ? 'Player move (X)' : 'AI move (O)...'}"
+          isXNext ? 'It is: Player move (X)' : 'It is: AI move (O)...'
         )}
       </div>
 
